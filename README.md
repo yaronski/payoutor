@@ -1,10 +1,11 @@
-# Token Payout Calculator for Moonbeam & Moonriver
+# Moonbeam Treasury Council Token Payout Calculator
 
 ## Overview
 
-`token_payout.sh` is a Bash script designed to automate the calculation of GLMR and MOVR token Treasury payouts based on a specified USD amount. It fetches recent block numbers and the 30-day EMA (Exponential Moving Average) price for each token from Subscan, ensuring accurate payout calculations for the Moonbeam and Moonriver networks.
+`payoutor.sh` is a Bash script designed to automate the calculation of GLMR and MOVR token Treasury payouts based on a specified USD amount. It fetches recent block numbers and the 30-day EMA (Exponential Moving Average) price for each token from Subscan, ensuring accurate payout calculations for the Moonbeam and Moonriver networks.
 
 ## Features
+
 - **Automated payout calculation** for GLMR and MOVR based on a USD input
 - **Fetches recent block numbers** for both networks (with offset for price stability)
 - **Extracts 30d EMA price** for the exact block from Subscan's price converter tool
@@ -14,33 +15,42 @@
 - **Professional, clear output** (terminal and file)
 
 ## Requirements
+
 - Bash (tested on macOS, should work on Linux)
 - `curl` (for HTTP requests)
 - `awk`, `bc`, `grep`, `sed` (standard Unix tools)
 - (Optional) `jq` (for config file parsing)
 
 Install missing dependencies on macOS with Homebrew:
+
 ```sh
 brew install curl jq bc
 ```
 
 ## Installation
-1. Place `token_payout.sh` in your working directory.
+
+1. Place `payoutor.sh` in your working directory.
+
 2. Make it executable:
+   
    ```sh
-   chmod +x token_payout.sh
+   chmod +x payoutor.sh
    ```
+
 3. (Optional) Create a `payout_config.json` for custom ratios (see below).
 
 ## Usage
+
 ```sh
-./token_payout.sh <USD_AMOUNT> [OPTIONS]
+./payoutor.sh <USD_AMOUNT> [OPTIONS]
 ```
 
 ### Arguments
+
 - `<USD_AMOUNT>`: The total payout amount in USD (e.g., `1000`, `1500.50`)
 
 ### Options
+
 - `-h, --help`           Show help message
 - `-v, --verbose`        Enable verbose output (debug/logging)
 - `-c, --config FILE`    Use a custom configuration file (default: payout_config.json)
@@ -51,19 +61,22 @@ brew install curl jq bc
 - `--version`            Show version information
 
 ### Examples
+
 ```sh
 # Basic payout calculation for $1000
-./token_payout.sh 1000
+./payoutor.sh 1000
 
 # Custom ratios and verbose logging
-./token_payout.sh 2000 --glmr-ratio 0.7 --movr-ratio 0.3 --verbose
+./payoutor.sh 2000 --glmr-ratio 0.7 --movr-ratio 0.3 --verbose
 
 # Use a custom config file and output file
-./token_payout.sh 1500 -c my_config.json -o my_output.txt
+./payoutor.sh 1500 -c my_config.json -o my_output.txt
 ```
 
 ## Configuration
+
 You can use a JSON config file (default: `payout_config.json`) to set custom payout ratios:
+
 ```json
 {
   "glmr_ratio": 0.65,
@@ -72,16 +85,19 @@ You can use a JSON config file (default: `payout_config.json`) to set custom pay
 ```
 
 ## Output
+
 - Results are printed to the terminal and saved to the output file (default: `payout_output.txt`).
 - Log messages are saved to the log file (default: `payout.log`).
 
 ## Troubleshooting
+
 - **Missing dependencies:** The script will alert you if required tools are missing.
 - **API/network errors:** If Subscan is unreachable or the price is unavailable for a block, the script will retry and log errors.
 - **Locale issues:** The script forces `LC_NUMERIC=C` for all calculations to avoid decimal/comma confusion.
 - **No EMA30 price for block:** The script uses a recent block (latest - 200) to maximize the chance of a valid EMA30 price. If you need a different block, adjust the offset in the script.
 
 ## FAQ
+
 **Q: How does the script get the EMA30 price for a block?**  
 A: It scrapes the Subscan price converter tool for the exact block and extracts the last available 30d EMA price shown on the page, matching what you see in the UI.
 
