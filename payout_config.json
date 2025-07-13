@@ -1,0 +1,7 @@
+{
+  "glmr_ratio": 0.6,
+  "movr_ratio": 0.4,
+  "retry_attempts": 3,
+  "timeout": 30,
+  "block_age_minutes": 5
+} 
