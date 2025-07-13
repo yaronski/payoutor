@@ -108,7 +108,7 @@ A: The script is tailored for GLMR (Moonbeam) and MOVR (Moonriver) but can be ad
 A: Use the `--glmr-ratio` and `--movr-ratio` options, or set them in a config file.
 
 **Q: What if the script fails to get a price?**  
-A: It will retry several times and log errors. If the block is too recent, try a slightly older block.
+A: It will retry several times and log errors. 
 
 **Q: How do I get the 30d EMA for an exact block?**  
 A: The script uses the block number in the Subscan tool and extracts the EMA30 price shown for that block, just as you would do manually.
