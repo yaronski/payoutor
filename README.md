@@ -2,7 +2,7 @@
 
 ## Overview
 
-`payoutor.sh` is a Bash script designed to automate the calculation of GLMR and MOVR token Treasury payouts based on a specified USD amount. It fetches recent block numbers and the 30-day EMA (Exponential Moving Average) price for each token from Subscan, ensuring accurate payout calculations for the Moonbeam and Moonriver networks.
+`payoutor.sh` is a Bash script designed to help members of the Moonbeam Treasury Council by automating the calculation of GLMR and MOVR token Treasury payouts based on a specified USD amount. It fetches recent block numbers and the 30-day EMA (Exponential Moving Average) price for each token from Subscan, ensuring accurate payout calculations for the Moonbeam and Moonriver networks.
 
 ## Features
 
@@ -18,8 +18,8 @@
 
 - Bash (tested on macOS, should work on Linux)
 - `curl` (for HTTP requests)
-- `awk`, `bc`, `grep`, `sed` (standard Unix tools)
-- (Optional) `jq` (for config file parsing)
+- `awk`, `bc`, `grep`, `sed`
+- `jq` (optional; for config file parsing)
 
 Install missing dependencies on macOS with Homebrew:
 
@@ -37,7 +37,7 @@ brew install curl jq bc
    chmod +x payoutor.sh
    ```
 
-3. (Optional) Create a `payout_config.json` for custom ratios (see below).
+3. (Optional) Create or edit `payout_config.json` for custom ratios (see below).
 
 ## Usage
 
@@ -86,20 +86,22 @@ You can use a JSON config file (default: `payout_config.json`) to set custom pay
 
 ## Output
 
-- Results are printed to the terminal and saved to the output file (default: `payout_output.txt`).
+- Results are printed to the terminal AND saved to the output file (default: `payout_output.txt`).
 - Log messages are saved to the log file (default: `payout.log`).
+
+![payoutor](src/img.png)
 
 ## Troubleshooting
 
 - **Missing dependencies:** The script will alert you if required tools are missing.
 - **API/network errors:** If Subscan is unreachable or the price is unavailable for a block, the script will retry and log errors.
 - **Locale issues:** The script forces `LC_NUMERIC=C` for all calculations to avoid decimal/comma confusion.
-- **No EMA30 price for block:** The script uses a recent block (latest - 200) to maximize the chance of a valid EMA30 price. If you need a different block, adjust the offset in the script.
+- **No EMA30 price for block:** The script uses a recent block (latest - 200) to ensure a valid, scrapable EMA30 price from Subscan. If you need a different block, adjust the offset in the script.
 
 ## FAQ
 
 **Q: How does the script get the EMA30 price for a block?**  
-A: It scrapes the Subscan price converter tool for the exact block and extracts the last available 30d EMA price shown on the page, matching what you see in the UI.
+A: It scrapes the Subscan price converter tool for prices at that exact block and extracts the 30d EMA price shown on the page, matching what you see in the UI.
 
 **Q: Can I use this for other tokens or networks?**  
 A: The script is tailored for GLMR (Moonbeam) and MOVR (Moonriver) but can be adapted for similar Subscan-supported networks.
@@ -115,4 +117,4 @@ A: The script uses the block number in the Subscan tool and extracts the EMA30 p
 
 ---
 
-For questions or improvements, contact the MBTC Team or open an issue in the project repository. 
+For questions or improvements, contact the MBTC Team in the [Moonbeam Forum](https://forum.moonbeam.network/) or open an issue in the project repository. 
