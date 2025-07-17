@@ -3,5 +3,12 @@
   "movr_ratio": 0.4,
   "retry_attempts": 3,
   "timeout": 30,
-  "block_age_minutes": 5
+  "block_age_minutes": 5,
+  "council_threshold": 3,
+  "council_length_bound": 10000,
+  "websocket_endpoints": {
+    "moonbeam": "wss://wss.api.moonbeam.network",
+    "moonriver": "wss://wss.api.moonriver.moonbeam.network"
+  },
+  "proxy_address": "0x1234567890123456789012345678901234567891"
 } 
