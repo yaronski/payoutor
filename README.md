@@ -2,7 +2,7 @@
 
 ## Overview
 
-`payoutor.sh` is a Bash script designed to make life easier for members of the **Moonbeam Treasury Council** by automating the calculation of GLMR and MOVR token Treasury payouts at current prices based on the requested amount in USD and by generating the specific extrinsic's call data from that. 
+`payoutor.sh` is a Bash script designed to make life easier for members of the **Moonbeam Treasury Council** by automating the calculation of GLMR and MOVR token Treasury payouts at current prices based on the requested amount in USD and by generating the specific treasury proposals extrinsic call data from that. 
 
 ![payoutor v2](src/img_02.png)
 
