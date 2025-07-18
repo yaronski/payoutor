@@ -1,18 +1,24 @@
-# Moonbeam Treasury Council Token Payout Calculator
+# Moonbeam Treasury Council's `payoutor v2` 
 
 ## Overview
 
-`payoutor.sh` is a Bash script designed to help members of the Moonbeam Treasury Council by automating the calculation of GLMR and MOVR token Treasury payouts based on a specified USD amount. It fetches recent block numbers and the 30-day EMA (Exponential Moving Average) price for each token from Subscan, ensuring accurate payout calculations for the Moonbeam and Moonriver networks.
+`payoutor.sh` is a Bash script designed to make life easier for members of the **Moonbeam Treasury Council** by automating the calculation of GLMR and MOVR token Treasury payouts at current prices based on the requested amount in USD and by generating the specific extrinsic's call data from that. 
+
+![payoutor v2](src/img_02.png)
+
 
 ## Features
 
-- **Automated payout calculation** for GLMR and MOVR based on a USD input
-- **Fetches recent block numbers** for both networks (with offset for price stability)
+- **Automated payout calculation** for GLMR and MOVR based on a USD input, current 30d EMA token prices and their split ratio
+- **Fetches recent block numbers** for both networks (with offset for Subscan 30d EMA price stability)
 - **Extracts 30d EMA price** for the exact block from Subscan's price converter tool
-- **Robust error handling** and logging
-- **Customizable payout ratios** (GLMR/MOVR)
-- **Configurable output and log files**
-- **Professional, clear output** (terminal and file)
+- **Generates extrinsic call data** for the treasury proposal on both Moonbeam and Moonriver
+- **Fetches latest proposal IDs** from both networks for council proposals
+- **Real-time progress logging** during council proposal generation
+- **Customizable config file** for adjusting token payout ratios, proxy address, RPC's etc.
+- **Multiple output formats** (terminal, txt, JSON, Markdown)
+
+
 
 ## Requirements
 
@@ -20,11 +26,12 @@
 - `curl` (for HTTP requests)
 - `awk`, `bc`, `grep`, `sed`
 - `jq` (optional; for config file parsing)
+- Node.js (for council proposal call data generation)
 
 Install missing dependencies on macOS with Homebrew:
 
 ```sh
-brew install curl jq bc
+brew install curl jq bc node
 ```
 
 ## Installation
@@ -37,19 +44,63 @@ brew install curl jq bc
    chmod +x payoutor.sh
    ```
 
-3. (Optional) Create or edit `payout_config.json` for custom ratios (see below).
+3. (Optional) Create or edit `payout_config.json` for custom ratios, a proxy address and more.
 
 ## Usage
 
 ```sh
-./payoutor.sh <USD_AMOUNT> [OPTIONS]
+./payoutor.sh <USD_AMOUNT> [RECIPIENT_ADDRESS] [OPTIONS]
 ```
 
 ### Arguments
 
 - `<USD_AMOUNT>`: The total payout amount in USD (e.g., `1000`, `1500.50`)
 
-### Options
+
+### Examples
+
+```sh
+# Basic payout calculation
+./payoutor.sh 1000
+
+# With recipient address
+./payoutor.sh 1000 0x1234567890123456789012345678901234567890
+
+# With proxy call data using address from config
+./payoutor.sh 1000 0x1234567890123456789012345678901234567890 --proxy
+
+# With proxy call data using a specific proxy address
+./payoutor.sh 1000 0x1234567890123456789012345678901234567890 --proxy-address 0x41D4B02022165Fcd47b4E0F64Aa41eEF9ef1da38
+```
+
+## Configuration
+
+You can use a JSON config file (default: `payout_config.json`) to set custom payout ratios, specify the proxy address for repeated usage and more:
+
+```json
+{
+  "glmr_ratio": 0.6,
+  "movr_ratio": 0.4,
+  "retry_attempts": 3,
+  "timeout": 30,
+  "block_age_minutes": 5,
+  "council_threshold": 3,
+  "council_length_bound": 10000,
+  "websocket_endpoints": {
+    "moonbeam": "wss://wss.api.moonbeam.network",
+    "moonriver": "wss://wss.api.moonriver.moonbeam.network"
+  },
+  "proxy_address": "0x1234567890123456789012345678901234567891"
+} 
+```
+
+## Proxy Features
+- `--proxy` enables output of proxy council proposal call data for both Moonbeam and Moonriver.
+- `--proxy-address <address>` specifies the proxy address to use for proxy call data.
+- If `--proxy` is set but no address is specified, the proxy address will be loaded from the `proxy_address` field in `payout_config.json`.
+- If neither is set, proxy call data is not output.
+
+## Options
 
 - `-h, --help`           Show help message
 - `-v, --verbose`        Enable verbose output (debug/logging)
@@ -58,38 +109,30 @@ brew install curl jq bc
 - `-l, --log FILE`       Specify log file (default: payout.log)
 - `--glmr-ratio RATIO`   Set GLMR allocation ratio (default: 0.6)
 - `--movr-ratio RATIO`   Set MOVR allocation ratio (default: 0.4)
-- `--version`            Show version information
-
-### Examples
-
-```sh
-# Basic payout calculation for $1000
-./payoutor.sh 1000
-
-# Custom ratios and verbose logging
-./payoutor.sh 2000 --glmr-ratio 0.7 --movr-ratio 0.3 --verbose
-
-# Use a custom config file and output file
-./payoutor.sh 1500 -c my_config.json -o my_output.txt
-```
-
-## Configuration
-
-You can use a JSON config file (default: `payout_config.json`) to set custom payout ratios:
-
-```json
-{
-  "glmr_ratio": 0.65,
-  "movr_ratio": 0.35
-}
-```
+- `--version`- `-h, --help`                Show help message
+- `-v, --verbose`             Enable verbose output
+- `-d, --dry-run`             Show calculations without making API calls
+- `-c, --config FILE`         Use custom configuration file
+- `-o, --output FILE`         Specify output file (default: payout_output.txt)
+- `-l, --log FILE`            Specify log file (default: payout.log)
+- `--glmr-ratio RATIO`        GLMR allocation ratio (default: 0.6)
+- `--movr-ratio RATIO`        MOVR allocation ratio (default: 0.4)
+- `--council-threshold N`     Council threshold (default: 3)
+- `--council-length-bound N`  Length bound (default: 10000)
+- `--moonbeam-ws URL`         Moonbeam WebSocket endpoint
+- `--moonriver-ws URL`        Moonriver WebSocket endpoint
+- `--json`                    Output results in JSON format
+- `--markdown|--md-table`     Output results in Markdown table format
+- `--proxy`                   Output proxy council proposal call data in addition to normal call data
+- `--proxy-address ADDR`      Specify proxy address (overrides config)
+- `--version`                 Show version information            Show version information
 
 ## Output
 
-- Results are printed to the terminal AND saved to the output file (default: `payout_output.txt`).
+- Results are printed to the terminal _and_ saved to the output file (default: `payout_output.txt`).
 - Log messages are saved to the log file (default: `payout.log`).
 
-![payoutor](src/img.png)
+
 
 ## Troubleshooting
 
@@ -98,22 +141,6 @@ You can use a JSON config file (default: `payout_config.json`) to set custom pay
 - **Locale issues:** The script forces `LC_NUMERIC=C` for all calculations to avoid decimal/comma confusion.
 - **No EMA30 price for block:** The script uses a recent block (latest - 200) to ensure a valid, scrapable EMA30 price from Subscan. If you need a different block, adjust the offset in the script.
 
-## FAQ
-
-**Q: How does the script get the EMA30 price for a block?**  
-A: It scrapes the Subscan price converter tool for prices at that exact block and extracts the 30d EMA price shown on the page, matching what you see in the UI.
-
-**Q: Can I use this for other tokens or networks?**  
-A: The script is tailored for GLMR (Moonbeam) and MOVR (Moonriver) but can be adapted for similar Subscan-supported networks.
-
-**Q: How do I change the payout ratios?**  
-A: Use the `--glmr-ratio` and `--movr-ratio` options, or set them in a config file.
-
-**Q: What if the script fails to get a price?**  
-A: It will retry several times and log errors. 
-
-**Q: How do I get the 30d EMA for an exact block?**  
-A: The script uses the block number in the Subscan tool and extracts the EMA30 price shown for that block, just as you would do manually.
 
 ---
 
