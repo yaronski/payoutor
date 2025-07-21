@@ -5,6 +5,9 @@ node_modules/
 *.log
 payout.log
 
+# Personal config file
+payout_config.json
+
 # Output files
 payout_output.txt
 payout_output_*.txt
